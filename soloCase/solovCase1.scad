@@ -94,6 +94,7 @@ holder_hole_diameter = 1.2;
 // help open ears
 earsSize=2;
 
+/*[(3) Top-image]*/
 // Enable image
 lid_image = false;
 // Image path
@@ -107,26 +108,81 @@ lid_image_rotation = 0; //[0:0.1:360]
 // Positional offset of the image
 lid_image_offset = [0,0];
 
+/*[(3) Top-Vents]*/
+// Enable vents
+lid_vent = false;
+// Length and width of the vents
+lid_vent_dimentions = [30,3];
+// Ammount if vent slots
+lid_vent_ammount = 4;
+// Spaceing between the vents
+lid_vent_spacing = 3;
+// Rotation of the vents
+lid_vent_rotation = 0; //[0:0.1:360]
+// Positional offset of the vents
+lid_vent_offset = [0,0];
 
-/*[Front]*/
-case_opening_shape = "rectangle"; //[rectangle:Rectangle, circle:Circle]
 
-/*[Front Pan]*/
+
+/*[(4) RIGHT Panel]*/
+R_cable_shape = "none"; //[none:None, rectangle:Rectangle, circle:Circle]
+// Dimentions of the rectangular cable opening
+R_cable_rec_dimentions = [15,5];
+// Diameter of the circular cable opening
+R_cable_cir_diameter = 3;
+// Ammount of circular cable openings
+R_cable_cir_ammount = 2;
+// Distance between circular cable opening
+R_cable_cir_spaceing = 2;
+// Cable opening offset from its center position
+R_cable_offset = [0,0];
+
+
+
+/*[(4) LEFT Panel]*/
+L_cable_shape = "none"; //[none:None, rectangle:Rectangle, circle:Circle]
+// Dimentions of the rectangular cable opening
+L_cable_rec_dimentions = [15,5];
+// Diameter of the circular cable opening
+L_cable_cir_diameter = 3;
+// Ammount of circular cable openings
+L_cable_cir_ammount = 2;
+// Distance between circular cable opening
+L_cable_cir_spaceing = 2;
+// Cable opening offset from its center position
+L_cable_offset = [0,0];
+
+
+
+/*[ (5) Front Panel]*/
 // Y center position (from center of board)
-Pin_y=-2.5;
+F_y=-2.5;
 // Z lower position (from bottom of board)
-Pin_z=3;
-
+F_z=3;
 // Y size
-Pin_size_y=10;
+F_size_y=10;
 // Z size
-Pin_size_z=6; 
-
+F_size_z=6; 
 // Text centered below the hole
-Text="S  +  -"; 
+F_Text="FRONT"; 
 // Text size
-Text_size = 3;   
-Text_depp = 3; 
+F_Text_size = 3;   
+F_Text_depp = 3; 
+
+/*[ (5) BACK Panel]*/
+// Y center position (from center of board)
+B_y=-2.5;
+// Z lower position (from bottom of board)
+B_z=3;
+// Y size
+B_size_y=10;
+// Z size
+B_size_z=6; 
+// Text centered below the hole
+B_Text="FRONT"; 
+// Text size
+B_Text_size = 3;   
+B_Text_depp = 3; 
 
 /*[Power Cord hole]*/
 // X position for the center of the power cord hole (from outside)
@@ -173,6 +229,16 @@ module dual_true_mirror(m1, o1, m2, o2){
             children();
         };
     };
+}
+
+module rotate_around_point(r, pt){
+    translate(pt){
+        rotate(r){
+            translate(-pt){
+                children();
+            }
+        }
+    }   
 }
 
 // --------------
@@ -255,6 +321,52 @@ module plot_case_image()
 }
 
 
+module plot_case_vents()
+{      
+          translate([
+    (Length/2)-((lid_vent_dimentions[1]+lid_vent_spacing)*lid_vent_ammount-lid_vent_spacing)/2+lid_vent_offset[0],
+    Width/2+Thickness-(lid_vent_dimentions[0])/2+lid_vent_offset[1],
+    -0.1
+])    
+        {
+            rotate_around_point([0,0,lid_vent_rotation],[((lid_vent_dimentions[1]+lid_vent_spacing)*lid_vent_ammount-lid_vent_spacing)/2,lid_vent_dimentions[0]/2]){
+                for(i=[0:lid_vent_ammount-1]){
+                    translate([i*(lid_vent_spacing+lid_vent_dimentions[1]),0,0]){
+                        cube([lid_vent_dimentions[1],lid_vent_dimentions[0],Thickness+0.2]);
+                    }
+                }
+            }
+        }
+  
+    
+    
+}
+
+
+module openSideForCable()
+{
+    render_offset = 0.1;
+    
+    if(R_cable_shape == "rectangle")
+    {
+       translate([Length/2+ R_cable_offset[0]
+                ,-render_offset,
+                Base_height/2+R_cable_offset[1]  ])   {
+        cube([R_cable_rec_dimentions[0], Thickness +          render_offset, R_cable_rec_dimentions[1]]);    
+      }
+    }
+    
+    if(L_cable_shape == "rectangle")
+    {
+       translate([Length/2+ L_cable_offset[0]
+                ,Width+Thickness,
+                Base_height/2+L_cable_offset[1]  ])   {
+        cube([L_cable_rec_dimentions[0], Thickness +          render_offset, L_cable_rec_dimentions[1]]);    
+      }
+    }
+    
+    
+}
 
 module conrner_support()
 {
@@ -304,13 +416,26 @@ module base(){
         translate([Thickness+(Length/2), 0.5*Thickness + 0.1, Base_height + Thickness/2]) rotate([0,0,180]) prism(Thickness/4+0.1, 10) ;
         
 
-        // Pin opening
-        translate([-Thickness, Thickness + Y_translation + Pin_y - Pin_size_y/2, Thickness + Support_z + Pin_z]) cube([3*Thickness, Pin_size_y, Pin_size_z], false) ;
+    // FRONT PANNEL 
+        translate([-Thickness, Thickness + Y_translation + F_y - F_size_y/2, Thickness + Support_z + F_z]) cube([3*Thickness, F_size_y, F_size_z], false) ;
         
-        translate([1-Margin, Thickness + Y_translation + Pin_y , Thickness + Support_z + Pin_z - Text_size - 1 ]) 
+        translate([1-Margin, Thickness + Y_translation + F_y , Thickness + Support_z + F_z - F_Text_size - 1 ]) 
     rotate([90,0,-90])
     linear_extrude(height = 1+Margin)
-    text(Text, size=Text_size, font="Arial:style=bold", halign="center");
+    text(F_Text, size=F_Text_size, font="Arial:style=bold", halign="center");
+        
+    // BACK PANNEL 
+        translate([Thickness+Length, Thickness + Y_translation + B_y - B_size_y/2, Thickness + Support_z + B_z]) cube([3*Thickness, B_size_y, B_size_z], false) ;
+        
+    translate([1-Margin+Length+Thickness, Thickness + Y_translation + B_y , Thickness + Support_z + B_z - B_Text_size - 1 ]) 
+rotate([90,0,-270])
+linear_extrude(height = 1+Margin)
+text(B_Text, size=B_Text_size, font="Arial:style=bold", halign="center");
+   
+ 
+  
+        
+        openSideForCable() ;
         
        
         // Outside opening for power cord
@@ -349,7 +474,6 @@ module base(){
    } 
    
 
-   
 
 }
 
@@ -401,6 +525,11 @@ translate([0, Width+2*Thickness + 10, 0]) {
    if(lid_image == true){
        plot_case_image() ;
    }
+
+   //Vent
+   if(lid_vent == true){
+       plot_case_vents() ;
+    }
 
      // hollowing the lid
       translate([Thickness,Thickness,Thickness]) cube ([Length, Width, Top_height+Base_height], false);
