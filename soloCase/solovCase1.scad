@@ -94,6 +94,18 @@ holder_hole_diameter = 1.2;
 // help open ears
 earsSize=2;
 
+// Enable image
+lid_image = false;
+// Image path
+lid_image_file = "topLogos/ping0.svg";
+// Depth of the image inset
+lid_image_depth = 0.5;
+// Scale of the image
+lid_image_scale = 1.1;
+// Rotation of the image
+lid_image_rotation = 0; //[0:0.1:360]
+// Positional offset of the image
+lid_image_offset = [0,0];
 
 
 /*[Front]*/
@@ -225,6 +237,25 @@ module plot_top(type)
 }
 
 
+module plot_case_image()
+{
+    translate([
+    (Length/2)+lid_image_offset[0],
+    Width/2+Thickness+lid_image_offset[1],
+    -0.1
+]){
+    rotate([0,0,lid_image_rotation]){
+        scale([-lid_image_scale,lid_image_scale,1]){
+            linear_extrude(lid_image_depth+0.1){
+                import(lid_image_file,center=true);
+            }
+        }
+    }
+}
+}
+
+
+
 module conrner_support()
 {
     
@@ -317,7 +348,7 @@ module base(){
        conrner_support() ;
    } 
    
-   
+
    
 
 }
@@ -363,16 +394,23 @@ translate([0, Width+2*Thickness + 10, 0]) {
          translate([Hole_x-Hole_r+Margin, 0, Top_height+Thickness]) cube([2*(Hole_r-Margin), Width+2*Thickness, Base_height-Hole_z+Thickness ], false) ;
          // inside wall (bigger) 
          translate([Hole_x-Hole_r-Thickness/2+Margin, Thickness/2+Margin, Top_height+Thickness]) cube([2*(Hole_r-Margin)+Thickness, Width+Thickness-2*Margin, Base_height-Hole_z+Thickness ], false) ;
+      }//union
 
-      }
 
-      // hollowing the lid
+   //diff the top image if selected
+   if(lid_image == true){
+       plot_case_image() ;
+   }
+
+     // hollowing the lid
       translate([Thickness,Thickness,Thickness]) cube ([Length, Width, Top_height+Base_height], false);
 
       // Hole for power Cord
       translate([Hole_x, -Thickness, Top_height+Base_height-Hole_z+2*Thickness ]) 
          rotate([-90, 0,0]) cylinder(r = Hole_r, h = Width+4*Thickness);
-   } ;
+      
+   } ; //diff
+  
    
    //SupportsType1
    if(SUPPORT_TYPE == "pipe"){ 
