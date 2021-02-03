@@ -44,14 +44,14 @@ Space_y = 5 ;
 
 //
 // Distance between holes in X axis
-Support_x=10;
+Support_x=20;
 // Distance between holes in Y axis
 Support_y=15;
 
 
 /*[(2) Supports]*/
 
-SUPPORT_TYPE="pipe"; //[pipe:Pipe,corner:Corner]
+SUPPORT_TYPE="corner"; //[pipe:Pipe,corner:Corner]
 
 
 // alignment mode : centered | align on right side | align on left side
@@ -96,36 +96,36 @@ earsSize=2;
 
 /*[(3) Top-image]*/
 // Enable image
-lid_image = false;
+lid_image = true;
 // Image path
 lid_image_file = "topLogos/ping0.svg";
 // Depth of the image inset
 lid_image_depth = 0.5;
 // Scale of the image
-lid_image_scale = 1.1;
+lid_image_scale = 0.8;
 // Rotation of the image
-lid_image_rotation = 0; //[0:0.1:360]
+lid_image_rotation = 90; //[0:0.1:360]
 // Positional offset of the image
 lid_image_offset = [0,0];
 
 /*[(3) Top-Vents]*/
 // Enable vents
-lid_vent = false;
+lid_vent = true;
 // Length and width of the vents
-lid_vent_dimentions = [30,3];
+lid_vent_dimentions = [20,2];
 // Ammount if vent slots
-lid_vent_ammount = 4;
+lid_vent_ammount = 5;
 // Spaceing between the vents
-lid_vent_spacing = 3;
+lid_vent_spacing = 4;
 // Rotation of the vents
 lid_vent_rotation = 0; //[0:0.1:360]
 // Positional offset of the vents
-lid_vent_offset = [0,0];
+lid_vent_offset = [2,0];
 
 
 
 /*[(4) RIGHT Panel]*/
-R_cable_shape = "none"; //[none:None, rectangle:Rectangle, circle:Circle]
+R_cable_shape = "rectangle"; //[none:None, rectangle:Rectangle, circle:Circle]
 // Dimentions of the rectangular cable opening
 R_cable_rec_dimentions = [15,5];
 // Diameter of the circular cable opening
@@ -140,17 +140,17 @@ R_cable_offset = [0,0];
 
 
 /*[(4) LEFT Panel]*/
-L_cable_shape = "none"; //[none:None, rectangle:Rectangle, circle:Circle]
+L_cable_shape = "circle"; //[none:None, rectangle:Rectangle, circle:Circle]
 // Dimentions of the rectangular cable opening
 L_cable_rec_dimentions = [15,5];
 // Diameter of the circular cable opening
 L_cable_cir_diameter = 3;
 // Ammount of circular cable openings
-L_cable_cir_ammount = 2;
+L_cable_cir_ammount = 8;
 // Distance between circular cable opening
 L_cable_cir_spaceing = 2;
 // Cable opening offset from its center position
-L_cable_offset = [0,0];
+L_cable_offset = [4,8];
 
 
 
@@ -158,13 +158,13 @@ L_cable_offset = [0,0];
 // Enable Front Connection
 frontOpen = true;
 // Y center position (from center of board)
-F_y=-2.5;
+F_y=0;
 // Z lower position (from bottom of board)
 F_z=3;
 // Y size
-F_size_y=10;
+F_size_y=20;
 // Z size
-F_size_z=6; 
+F_size_z=5; 
 // Text centered below the hole
 F_Text="FRONT"; 
 // Text size
@@ -371,6 +371,37 @@ module openSidesForCable()
       }
     }
     
+    if (R_cable_shape == "circle"){
+            rotate([90,0,0]){
+                for(i = [0:R_cable_cir_ammount-1]){
+                    translate([
+                        (Length)/2 + R_cable_offset[0] - (R_cable_cir_ammount-1)*(R_cable_cir_diameter/2)-R_cable_cir_spaceing/2*R_cable_cir_ammount + i*R_cable_cir_diameter+i*R_cable_cir_spaceing,
+                        R_cable_cir_diameter/2 + R_cable_offset[1],
+                        -render_offset-Thickness
+                    ])            
+                    {
+                        cylinder(Thickness + render_offset, d=R_cable_cir_diameter,$fn=50);
+                }
+            }
+        }
+    }
+        
+        
+    if (L_cable_shape == "circle"){
+    rotate([90,0,0]){
+        for(i = [0:L_cable_cir_ammount-1]){
+            translate([
+                (Length)/2 + L_cable_offset[0] - (L_cable_cir_ammount-1)*(L_cable_cir_diameter/2)-L_cable_cir_spaceing/2*L_cable_cir_ammount + i*L_cable_cir_diameter+i*L_cable_cir_spaceing,
+                L_cable_cir_diameter/2 + L_cable_offset[1],
+                -render_offset-2*Thickness-Width
+            ])            
+            {
+                cylinder(Thickness + render_offset, d=L_cable_cir_diameter,$fn=50);
+                }
+            }
+        }
+    }
+    
     
 }
 
@@ -478,14 +509,14 @@ text(B_Text, size=B_Text_size, font="Arial:style=bold", halign="center");
            }
    }
   
-  
    //SupportsType2
    if(SUPPORT_TYPE == "corner"){
        conrner_support() ;
    } 
    
-
-
+   
+   
+   
 }
 
 
