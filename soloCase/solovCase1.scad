@@ -22,7 +22,7 @@ Margin=0.1 ;
 // --------------
 // Adjustable variables
 
-/*[Box size]*/
+/*[(1) Box size]*/
 // inner length (X axis) in mm
 Length=48 ;
 // inner width (Y axis) in mm
@@ -36,13 +36,7 @@ Top_height=5 ;
 Thickness=2 ;
 
 
-/*[Supports]*/
-
-SUPPORT_TYPE="pipe"; //[pipe:Pipe,corner:Corner]
-
-
-// alignment mode : centered | align on right side | align on left side
-Align = 0 ; // [0:center, 1:right, 2:left]
+/*[(1) PCB size]*/
 // Space between the center of first support and the front side
 Space_x = 4 ;
 // Space between the center of support and the side (for left ot right alignment)
@@ -53,11 +47,20 @@ Space_y = 5 ;
 Support_x=10;
 // Distance between holes in Y axis
 Support_y=15;
-// Height of the support
-Support_z=3 ;
 
 
-/*[SupportType#1-pipes]*/
+/*[(2) Supports]*/
+
+SUPPORT_TYPE="pipe"; //[pipe:Pipe,corner:Corner]
+
+
+// alignment mode : centered | align on right side | align on left side
+Align = 0 ; // [0:center, 1:right, 2:left]
+
+
+
+
+/*[(2) SupportType#1-pipes]*/
 
 // Type of support : 0=simple, 1=with column, 2=M3x6 Bolt from above in hexagonal nut, 3=M3 Bolt from bottom in column
 Support_type = [1, 3, 1, 3] ;
@@ -70,8 +73,10 @@ Column_r = 2.7 ;
 // length of the Bolt (for type 3 support)
 Bolt_length = 12 ;
 
+// Height of the support
+Support_z=3 ;
 
-/* [SupportType#2-Corner] */
+/* [(2) SupportType#2-Corner] */
 // Size of PCB clamps
 holder_spacing = 2;
 // Size of platfrom supporting the PCB
@@ -85,8 +90,13 @@ holder_offset = 0.2; //Ultimaker 2
 // Hole in the PCB clamps. This is meant to screw the holder blocks in place. 0 for no hole
 holder_hole_diameter = 1.2;
 
+/*[(3) Top]*/
+// help open ears
+earsSize=2;
 
-/*[Top Case]*/
+
+
+/*[Front]*/
 case_opening_shape = "rectangle"; //[rectangle:Rectangle, circle:Circle]
 
 /*[Front Pan]*/
@@ -112,7 +122,7 @@ Hole_x=43;
 // Z position for the center of the power cord hole
 Hole_z=9;
 //Diameter in mm (-1 to remove completly)
-Hole_r=3;
+Hole_r=-1;
 
 
 /* [Hidden] */
@@ -332,6 +342,13 @@ translate([0, Width+2*Thickness + 10, 0]) {
       union() {
          // Base unit
          roundedCube( [Length+2*Thickness, Width+2*Thickness, Top_height+Thickness], Thickness) ;
+          
+          //openEars
+     translate([0, Width/2+Thickness, 0])
+          roundedCube( [0, 0, Thickness], earsSize) ;
+     translate([Length+2*Thickness, Width/2+Thickness, 0])
+          roundedCube( [0, 0, Thickness], earsSize) ;
+          
          // inside wall
          translate([Thickness/2+Margin, Thickness/2+Margin, Top_height+Thickness]) roundedCube( [Length+Thickness-2*Margin, Width+Thickness-2*Margin, Thickness-Margin], Thickness/2-Margin) ;
 
