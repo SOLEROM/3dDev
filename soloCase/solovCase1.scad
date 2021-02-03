@@ -154,7 +154,9 @@ L_cable_offset = [0,0];
 
 
 
-/*[ (5) Front Panel]*/
+/*[ (5) FRONT Panel]*/
+// Enable Front Connection
+frontOpen = true;
 // Y center position (from center of board)
 F_y=-2.5;
 // Z lower position (from bottom of board)
@@ -170,6 +172,8 @@ F_Text_size = 3;
 F_Text_depp = 3; 
 
 /*[ (5) BACK Panel]*/
+// Enable BACK Connection
+backOpen = false;
 // Y center position (from center of board)
 B_y=-2.5;
 // Z lower position (from bottom of board)
@@ -179,12 +183,14 @@ B_size_y=10;
 // Z size
 B_size_z=6; 
 // Text centered below the hole
-B_Text="FRONT"; 
+B_Text="BACK"; 
 // Text size
 B_Text_size = 3;   
 B_Text_depp = 3; 
 
 /*[Power Cord hole]*/
+// Enable Cord Hole
+cordHole=false;
 // X position for the center of the power cord hole (from outside)
 Hole_x=43;
 // Z position for the center of the power cord hole
@@ -343,7 +349,7 @@ module plot_case_vents()
 }
 
 
-module openSideForCable()
+module openSidesForCable()
 {
     render_offset = 0.1;
     
@@ -352,7 +358,7 @@ module openSideForCable()
        translate([Length/2+ R_cable_offset[0]
                 ,-render_offset,
                 Base_height/2+R_cable_offset[1]  ])   {
-        cube([R_cable_rec_dimentions[0], Thickness +          render_offset, R_cable_rec_dimentions[1]]);    
+        cube([R_cable_rec_dimentions[0], Thickness +          2*render_offset, R_cable_rec_dimentions[1]]);    
       }
     }
     
@@ -361,7 +367,7 @@ module openSideForCable()
        translate([Length/2+ L_cable_offset[0]
                 ,Width+Thickness,
                 Base_height/2+L_cable_offset[1]  ])   {
-        cube([L_cable_rec_dimentions[0], Thickness +          render_offset, L_cable_rec_dimentions[1]]);    
+        cube([L_cable_rec_dimentions[0], Thickness +          2*render_offset, L_cable_rec_dimentions[1]]);    
       }
     }
     
@@ -415,30 +421,35 @@ module base(){
         translate([Thickness+(Length/2), 1.5*Thickness + Width - 0.1, Base_height + Thickness/2]) prism(Thickness/4+0.1, 10) ;
         translate([Thickness+(Length/2), 0.5*Thickness + 0.1, Base_height + Thickness/2]) rotate([0,0,180]) prism(Thickness/4+0.1, 10) ;
         
-
+    
     // FRONT PANNEL 
+ if(frontOpen == true){
         translate([-Thickness, Thickness + Y_translation + F_y - F_size_y/2, Thickness + Support_z + F_z]) cube([3*Thickness, F_size_y, F_size_z], false) ;
         
         translate([1-Margin, Thickness + Y_translation + F_y , Thickness + Support_z + F_z - F_Text_size - 1 ]) 
     rotate([90,0,-90])
     linear_extrude(height = 1+Margin)
     text(F_Text, size=F_Text_size, font="Arial:style=bold", halign="center");
-        
+ } 
+ 
     // BACK PANNEL 
+  if(backOpen == true){
         translate([Thickness+Length, Thickness + Y_translation + B_y - B_size_y/2, Thickness + Support_z + B_z]) cube([3*Thickness, B_size_y, B_size_z], false) ;
         
     translate([1-Margin+Length+Thickness, Thickness + Y_translation + B_y , Thickness + Support_z + B_z - B_Text_size - 1 ]) 
 rotate([90,0,-270])
 linear_extrude(height = 1+Margin)
 text(B_Text, size=B_Text_size, font="Arial:style=bold", halign="center");
-   
+  }
  
   
-        
-        openSideForCable() ;
-        
+     //LEFT AND RIGHT PANELS OPEN CONNECTORS  
+        openSidesForCable() ;
+      
+ 
        
         // Outside opening for power cord
+ if(cordHole == true){
         translate([Hole_x, -Thickness, Hole_z]) {
             rotate([-90, 0,0]) cylinder(r = Hole_r, h = Width+4*Thickness);
         }
@@ -447,7 +458,7 @@ text(B_Text, size=B_Text_size, font="Arial:style=bold", halign="center");
         // Inside shape for power cord 
         translate([Hole_x-Hole_r-Thickness/2, Thickness/2, Hole_z]) cube([2*Hole_r+Thickness, Width+Thickness, Base_height-Hole_z+2*Thickness ], false) ;
     }
-
+  }
 
     //SupportsType1
     if(SUPPORT_TYPE == "pipe"){
@@ -512,12 +523,15 @@ translate([0, Width+2*Thickness + 10, 0]) {
          translate([Thickness+(Length/2), 1.5*Thickness + Width - Margin, Top_height+ 1.5*Thickness]) prism(Thickness/4, 10) ;
          translate([Thickness+(Length/2), Thickness/2 + Margin, Top_height+ 1.5*Thickness]) rotate([0,0,180]) prism(Thickness/4, 10) ;
 
-
+    if(cordHole == true){
          // Wall for closing power cord hole
          // extern wall
          translate([Hole_x-Hole_r+Margin, 0, Top_height+Thickness]) cube([2*(Hole_r-Margin), Width+2*Thickness, Base_height-Hole_z+Thickness ], false) ;
          // inside wall (bigger) 
          translate([Hole_x-Hole_r-Thickness/2+Margin, Thickness/2+Margin, Top_height+Thickness]) cube([2*(Hole_r-Margin)+Thickness, Width+Thickness-2*Margin, Base_height-Hole_z+Thickness ], false) ;
+    }
+         
+         
       }//union
 
 
