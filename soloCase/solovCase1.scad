@@ -44,9 +44,9 @@ Space_y = 5 ;
 
 //
 // Distance between holes in X axis
-Support_x=20;
+Support_x=20.1;
 // Distance between holes in Y axis
-Support_y=15;
+Support_y=15.1;
 
 
 /*[(2) Supports]*/
