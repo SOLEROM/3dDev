@@ -7,9 +7,15 @@
 ///////////////////////////////
 
 
-/* [GLOBAL] */
-CREATE = "full"; //[full:Full, base:Base, case:Case]
+/* [RENDER] */
 
+RENDER_BASE = true;
+RENDER_CASE = true;
+RENDER_PCB =  false;
+//render usb connectors on pcb board
+RENDER_USB =  false;
+//render debug elements
+DEBUG = false;
 
 // --------------
 /*[General parameters]*/
@@ -38,16 +44,33 @@ Thickness=2 ;
 
 /*[(1) PCB size]*/
 // Space between the center of first support and the front side
-Space_x = 4 ;
+pcb_space_x = 4 ;
 // Space between the center of support and the side (for left ot right alignment)
-Space_y = 5 ;
-
+pcb_space_y = 5 ;
 //
 // Distance between holes in X axis
-Support_x=20.1;
+pcb_x=20.1;
 // Distance between holes in Y axis
-Support_y=15.1;
+pcb_y=15.1;
+pcb_z=0.5;
 
+
+/*[(1) PCB Simulate]*/
+//make pcb transperent  (def alfa=50)
+alfa_persents= 80;
+hole_d = 1.1;
+ring_d = 2.1;
+//hole persent to move inside pcb : 0-1
+hole_persent_inside = 0.1;
+
+//offset vector for usb RIGHT side connections ; fill with [,,,]
+connectors_rigth = [];
+//offset vector for usb LEFT side connections ; fill with [,,,
+connectors_left = [];
+//offset vector for usb FRONT side connections ; fill with [,,,
+connectors_front = [];
+//offset vector for usb BACK side connections ; fill with [,,,
+connectors_back = [];
 
 /*[(2) Supports]*/
 
@@ -213,7 +236,98 @@ Screwing_length = 6 ;
 Pcb_height = 1.7 ;
 
 // Translation for the center of the support
-Y_translation = ( Align==0 ? Width/2 : (Align==1 ? Space_y+Support_y/2 : Width - (Space_y+ Support_y/2) ) ) ;
+Y_translation = ( Align==0 ? Width/2 : (Align==1 ? pcb_space_y+pcb_y/2 : Width - (pcb_space_y+ pcb_y/2) ) ) ;
+
+
+
+
+
+
+// -----------------------------
+// -----------------------------
+
+
+include <./include/globals.scad>
+use <./include/utils.scad>
+use <./include/usb.scad>
+
+
+
+module simulate_connectors() {
+ 
+ board_dim=[pcb_x, pcb_y,pcb_z];
+ spacingFix=2*holder_spacing-holder_spacing/2*holder_offset;
+ pcbStart_x=pcb_x/2+pcb_space_x + spacingFix;
+ pcbStart_y=pcb_y/2+pcb_space_y + spacingFix;   
+ pcbStart_z=holder_height;
+ boardStart=[pcbStart_x-pcb_x/2, pcbStart_y-pcb_y/2, pcbStart_z];       
+
+   
+/* Components bounding box dimensions */
+microusb_dim    = [    16,  8,    3];
+  
+    //right:
+for (i=[0:len(connectors_rigth)-1]) 
+{
+        positionOffset=boardStart+[connectors_rigth[i],0,0];
+        set_components(board_dim, [
+             [/* info function  */  microusb_info(),
+             /* box dimensions */  microusb_dim,
+             /* comp-corner    */  [ 0, 0,0],
+             /* rotate         */  [0,0,-1],
+             /*  board-corner  */  [0,0, 0],
+             /*   position     */  positionOffset] 
+           ],false) {  microusb(dim=microusb_dim); } 
+  
+}//for
+
+
+       
+       
+}
+
+module simulate_PCB() {
+    
+//pcb
+pcb_corner_round = 1;
+spacingFix=2*holder_spacing-holder_spacing/2*holder_offset;
+pcbStart_x=pcb_x/2+pcb_space_x + spacingFix;
+pcbStart_y=pcb_y/2+pcb_space_y + spacingFix;
+//ring
+hole_orig = [pcb_x, pcb_y] * -.5;
+holes_pos = [for (y=[pcb_y*hole_persent_inside, pcb_y*(1-hole_persent_inside)], x=[pcb_x*hole_persent_inside, pcb_x*(1-hole_persent_inside)]) hole_orig + [x, y] ];
+
+////TBD :: insert hole vector from user
+//holes_pos = [for (y=[user_hole_vector_x_input], x=[user_hole_vector_y_input]) hole_orig + [x, y] ];
+
+
+ring_off = ring_d - hole_d;
+
+// render
+translate([pcbStart_x, pcbStart_y, holder_height])
+extrude_plate(pcb_z, holes_pos, hole_d, ring_off, clr=c_green_pcb, clr_ring=c_yellow,alfa=alfa_persents/100)
+    plate_2d(pcb_x,pcb_y, pcb_corner_round);   
+//
+  
+
+
+   if (DEBUG) {
+       boardStart=[pcbStart_x-pcb_x/2, pcbStart_y-pcb_y/2, holder_height];       
+
+              translate(boardStart) {
+            color("blue",alpha=0.50)                     cylinder(h=20, d=.25, center=true);
+            color("green",alpha=0.50) rotate([90, 0, 0]) cylinder(h=20, d=.25, center=true);
+            color("red",alpha=0.50)   rotate([0, 90, 0]) cylinder(h=20, d=.25, center=true);
+            color("pink",alpha=0.50) sphere(.5);
+        }
+        
+       
+        
+    }
+
+}
+
+
 
 
 
@@ -246,6 +360,15 @@ module rotate_around_point(r, pt){
         }
     }   
 }
+
+
+
+
+
+
+
+
+
 
 // --------------
 // modules definition
@@ -411,13 +534,13 @@ module conrner_support()
     pcb_width=Width;
     pcb_length=Length;
     render_offset = 0.1;  
-    //Space_x Space_y
-    //Support_x Support_y
+    //pcb_space_x pcb_space_y
+    //pcb_x pcb_y
        
     //Corner support
-    translate([Thickness + Space_x, Thickness + Space_y])   
+    translate([Thickness + pcb_space_x, Thickness + pcb_space_y])   
     {
-        dual_true_mirror([0,1,0], [0,holder_spacing*2 + Support_y,0], [1,0,0], [holder_spacing*2 + Support_x ,0,0]){
+        dual_true_mirror([0,1,0], [0,holder_spacing*2 + pcb_y,0], [1,0,0], [holder_spacing*2 + pcb_x ,0,0]){
             difference(){
                 //Cube
                 union(){
@@ -494,18 +617,18 @@ text(B_Text, size=B_Text_size, font="Arial:style=bold", halign="center");
     //SupportsType1
     if(SUPPORT_TYPE == "pipe"){
             // SupportsType1
-            translate([Thickness + Space_x, Thickness + Y_translation]) union () {
-              translate([0, -Support_y/2])           plot(Support_type[0]);
-              translate([0,  Support_y/2])           plot(Support_type[1]);
-              translate([Support_x,  Support_y/2])   plot(Support_type[2]);
-              translate([Support_x, -Support_y/2])   plot(Support_type[3]);
+            translate([Thickness + pcb_space_x, Thickness + Y_translation]) union () {
+              translate([0, -pcb_y/2])           plot(Support_type[0]);
+              translate([0,  pcb_y/2])           plot(Support_type[1]);
+              translate([pcb_x,  pcb_y/2])   plot(Support_type[2]);
+              translate([pcb_x, -pcb_y/2])   plot(Support_type[3]);
             }
             //SupportsType1
-           translate([Thickness + Space_x, Thickness + Y_translation, -Margin]) union () {
-              translate([0, -Support_y/2])           plot_hole(Support_type[0]);
-              translate([0,  Support_y/2])           plot_hole(Support_type[1]);
-              translate([Support_x,  Support_y/2])   plot_hole(Support_type[2]);
-              translate([Support_x, -Support_y/2])   plot_hole(Support_type[3]);
+           translate([Thickness + pcb_space_x, Thickness + Y_translation, -Margin]) union () {
+              translate([0, -pcb_y/2])           plot_hole(Support_type[0]);
+              translate([0,  pcb_y/2])           plot_hole(Support_type[1]);
+              translate([pcb_x,  pcb_y/2])   plot_hole(Support_type[2]);
+              translate([pcb_x, -pcb_y/2])   plot_hole(Support_type[3]);
            }
    }
   
@@ -589,11 +712,11 @@ translate([0, Width+2*Thickness + 10, 0]) {
    //SupportsType1
    if(SUPPORT_TYPE == "pipe"){ 
    // Column above the support plots
-       translate([Thickness + Space_x, Thickness + Width - Y_translation]) union () {
-          translate([0,  Support_y/2])           plot_top(Support_type[0]);
-          translate([0, -Support_y/2])           plot_top(Support_type[1]);
-          translate([Support_x, -Support_y/2])   plot_top(Support_type[2]);
-          translate([Support_x,  Support_y/2])   plot_top(Support_type[3]);
+       translate([Thickness + pcb_space_x, Thickness + Width - Y_translation]) union () {
+          translate([0,  pcb_y/2])           plot_top(Support_type[0]);
+          translate([0, -pcb_y/2])           plot_top(Support_type[1]);
+          translate([pcb_x, -pcb_y/2])   plot_top(Support_type[2]);
+          translate([pcb_x,  pcb_y/2])   plot_top(Support_type[3]);
        }
    }
    
@@ -611,13 +734,21 @@ translate([0, Width+2*Thickness + 10, 0]) {
 ///////////////////////////////
 
 /* Generate */
-if(CREATE == "full"){
-render_base() ;
-render_case() ;   
-}
-if(CREATE == "base"){
+if(RENDER_BASE){
 render_base() ;
 }
-if(CREATE == "case"){
+if(RENDER_CASE){
 render_case() ;
 }
+
+if(RENDER_PCB){
+ simulate_PCB() ;
+}
+if(RENDER_USB){
+simulate_connectors() ;
+}
+
+
+
+
+
