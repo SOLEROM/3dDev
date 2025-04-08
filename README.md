@@ -11,5 +11,11 @@
 * [usbDongle](./usbDong/readme.md)
 * [usbCable](./usbCable/readme.md)
 
+## my designs
+* [pcb holders](./pcbHolders/readme.md)
+* [fox mini sd](./combs/readme.md)
+
+
+
 ## collections
 * [gridify](https://makerworld.com/en/collections/4954580-gridify)
