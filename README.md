@@ -1,5 +1,10 @@
 # 3dDev
 
+[drive link](https://drive.google.com/drive/folders/1_VRVyRglavsCJHS49RvjFfHZ68z6KB4_) | 
+
+## byTopics
+
+
 * [scads](./scads/readme.md)
 * [cases](./cases/readme.md)
 * [stacks](./stacks/readme.md)
@@ -10,6 +15,9 @@
 * [nameTags](./nameTags/readme.md)
 * [usbDongle](./usbDong/readme.md)
 * [usbCable](./usbCable/readme.md)
+* [bitsTools](./bitsTools/readme.md)
+* [camping](./camping/readme.md)   
+
 
 ## my designs
 * [pcb holders](./pcbHolders/readme.md)
