@@ -1,6 +1,7 @@
 # 3dDev
 
-[drive link](https://drive.google.com/drive/folders/1_VRVyRglavsCJHS49RvjFfHZ68z6KB4_) | 
+* [drive link](https://drive.google.com/drive/folders/1_VRVyRglavsCJHS49RvjFfHZ68z6KB4_)  
+* [thingiverse likes](https://www.thingiverse.com/solov/designs)
 
 ## byTopics
 
@@ -16,7 +17,11 @@
 * [usbDongle](./usbDong/readme.md)
 * [usbCable](./usbCable/readme.md)
 * [bitsTools](./bitsTools/readme.md)
-* [camping](./camping/readme.md)   
+* [camping](./camping/readme.md) 
+* [display](./display/readme.md)
+* [inDrawOrder](./inDraw/readme.md)  
+* [best Box](./bestBox/readme.md)
+* [underdesk](./underDesk/readme.md)
 
 
 ## my designs
